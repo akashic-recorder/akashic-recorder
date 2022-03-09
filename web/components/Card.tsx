@@ -1,9 +1,7 @@
-import React from 'react';
-import classNames from 'classnames';
-import { AiFillHeart } from 'react-icons/ai';
-import { BsChatSquareFill } from 'react-icons/bs';
+import React from 'react'
+import classNames from 'classnames'
 
-import styles from './Card.module.css';
+import styles from './Card.module.css'
 
 const Card = ({ title, image, action }) => {
   return (
@@ -13,11 +11,6 @@ const Card = ({ title, image, action }) => {
           <img src={image} className={styles.image} alt='' />
         </div>
         <div className={styles.badgeWrapper}>
-          {/* <div
-            className={classNames([styles.dangerBadge, styles.badgeAnime])}
-          >
-            <AiFillHeart />
-          </div> */}
           <div
             className={classNames([
               styles.claimBadge,
@@ -25,7 +18,6 @@ const Card = ({ title, image, action }) => {
               'group',
             ])}
           >
-            {/* <BsChatSquareFill /> */}
             <button
               type="button"
               onClick={action}
@@ -43,4 +35,4 @@ const Card = ({ title, image, action }) => {
   );
 };
 
-export default Card;
+export default Card

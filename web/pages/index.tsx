@@ -4,7 +4,6 @@ import WalletLink from 'walletlink'
 import Web3Modal from 'web3modal'
 import Head from 'next/head'
 import { useCallback, useEffect, useReducer, useState } from 'react'
-import classNames from 'classnames';
 import { ellipseAddress, getChainData } from '../lib/utilities'
 import { mintPort } from './mintport'
 import { akaschicRecorder } from './akaschicRecorder'
