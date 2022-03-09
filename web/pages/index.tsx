@@ -151,7 +151,6 @@ export const Home = (): JSX.Element => {
       return
     }
     const events = await akaschicRecorder.getEvents(address)
-    console.log(events)
     setEvents(events)
   }
 

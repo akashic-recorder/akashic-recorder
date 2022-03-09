@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from 'axios'
 
 export const apiClient = axios.create({
     baseURL: 'https://akaschic-recorder-api.herokuapp.com/api',
@@ -38,7 +38,6 @@ class AkaschicRecorder {
                 ]
             }
         }
-        console.log(res.data)
         return res.data
     }
 }

@@ -16,7 +16,6 @@ class MintPort {
                 chain: 'polygon',
             },
         })
-        console.log(res)
     }
 
     async mint(toAddress: string) {
@@ -27,6 +26,7 @@ class MintPort {
             file_url: 'https://gateway.pinata.cloud/ipfs/QmV1o53q2aYyvesLyUbSrMnvRjsQuRRAx5WqCHXb4qG23i',
             mint_to_address: toAddress,
         })
+        // eslint-disable-next-line no-console
         console.log(res)
     }
 }
