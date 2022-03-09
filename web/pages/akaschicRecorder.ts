@@ -42,4 +42,4 @@ class AkaschicRecorder {
     }
 }
 
-export const akaschicRecorder = new AkaschicRecorder()
+export default new AkaschicRecorder()
