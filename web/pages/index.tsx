@@ -1,12 +1,16 @@
 import WalletConnectProvider from '@walletconnect/web3-provider'
 import { providers } from 'ethers'
-import Head from 'next/head'
-import { useCallback, useEffect, useReducer } from 'react'
 import WalletLink from 'walletlink'
 import Web3Modal from 'web3modal'
+import Head from 'next/head'
+import { useCallback, useEffect, useReducer, useState } from 'react'
+import classNames from 'classnames';
 import { ellipseAddress, getChainData } from '../lib/utilities'
+import { mintPort } from './mintport'
+import { akaschicRecorder } from './akaschicRecorder'
+import Card from "../components/Card"
 
-const INFURA_ID = '460f40a260564ac4a4f4b3fffb032dad'
+const INFURA_ID = '6ae5bd1d600f40048725736711ef4acb'
 
 const providerOptions = {
   walletconnect: {
@@ -112,22 +116,14 @@ function reducer(state: StateType, action: ActionType): StateType {
 export const Home = (): JSX.Element => {
   const [state, dispatch] = useReducer(reducer, initialState)
   const { provider, web3Provider, address, chainId } = state
+  const [events, setEvents] = useState([]);
 
   const connect = useCallback(async function () {
-    // This is the initial `provider` that is returned when
-    // using web3Modal to connect. Can be MetaMask or WalletConnect.
     const provider = await web3Modal.connect()
-
-    // We plug the initial `provider` into ethers.js and get back
-    // a Web3Provider. This will add on methods from ethers.js and
-    // event listeners such as `.on()` will be different.
     const web3Provider = new providers.Web3Provider(provider)
-
     const signer = web3Provider.getSigner()
     const address = await signer.getAddress()
-
     const network = await web3Provider.getNetwork()
-
     dispatch({
       type: 'SET_WEB3_PROVIDER',
       provider,
@@ -149,6 +145,25 @@ export const Home = (): JSX.Element => {
     },
     [provider]
   )
+
+  const checkEvents = async function () {
+    if (!address) {
+      alert('Please connect wallet')
+      return
+    }
+    const events = await akaschicRecorder.getEvents(address)
+    console.log(events)
+    setEvents(events)
+  }
+
+  const mint = async function () {
+    // await mintPort.getNFTs()
+    if (!address) {
+      alert('Please connect wallet')
+      return
+    }
+    await mintPort.mint(address)
+  }
 
   // Auto connect to the cached provider
   useEffect(() => {
@@ -202,7 +217,7 @@ export const Home = (): JSX.Element => {
   return (
     <div className="container">
       <Head>
-        <title>Create Next App</title>
+        <title>Certificates | Akashic Records</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
@@ -210,33 +225,62 @@ export const Home = (): JSX.Element => {
         {address && (
           <div className="grid">
             <div>
-              <p className="mb-1">Network:</p>
-              <p>{chainData?.name}</p>
+              <div>
+                <p className="mb-1">Address: {ellipseAddress(address)}</p>
+              </div>
+              <div>
+                <p className="mb-1">Network: {chainData?.name}</p>
+              </div>
             </div>
             <div>
-              <p className="mb-1">Address:</p>
-              <p>{ellipseAddress(address)}</p>
+              <button className="disconnect-button" type="button" onClick={disconnect}>
+                Disconnect
+              </button>
             </div>
           </div>
         )}
       </header>
 
-      <main>
-        <h1 className="title">NFT Minting Page</h1>
-        {web3Provider ? (
-          <button className="button" type="button" onClick={disconnect}>
-            Disconnect
-          </button>
-        ) : (
+      <main className='section'>
+        <p className="text-2xl">Event Participation Certificates</p>
+
+        {web3Provider && events.length === 0 ? (
+          <>
+            <br/><br/>
+            <button className="button" type="button" onClick={checkEvents}>
+              Check Certificates
+            </button>
+          </>
+        ) : !web3Provider ? (
           <button className="button" type="button" onClick={connect}>
-            Connect
+            Connect Wallet
           </button>
-        )}
+        ) : null}
+
+        <section className="container">
+          {events ? (
+            <div className="layout">
+              {events.map((element, index) => (
+                // TODO:
+                <Card
+                  key={index}
+                  // title={element.title}
+                  // likes={element.likes}
+                  // order={index + 1}
+                  // image={element.image}
+                  title="2021 Mar 1st Event"
+                  image="https://lh3.googleusercontent.com/ZMdzHfjinqrmesQuaQZz119y6IymfiKjRpdVyi2BHJC9mkiMZAyAP4M3uU8wZF-3diC3MCLfdlyj1yAbqkSsp6dZUzu0L2zbzvW8yNs=w600"
+                  // image="https://lh3.googleusercontent.com/Z7D7DxNK7rzqV2_SrxGsixtmfmESqGY13iZaENj8Nixr-90QdQhmRyxh8LwjB8MnX8AXOrBRr4rQCXlFuH69h4lMSi96SO8K4ed06A=w600"
+                  action={mint}
+                />
+              ))}
+            </div>
+          ) : null}
+        </section>
       </main>
 
       <style jsx>{`
         main {
-          padding: 5rem 0;
           text-align: center;
         }
 
@@ -261,6 +305,15 @@ export const Home = (): JSX.Element => {
           background: ${web3Provider ? 'red' : 'green'};
           border: none;
           border-radius: 0.5rem;
+          color: #fff;
+          font-size: 1.2rem;
+        }
+
+        .disconnect-button {
+          padding: 0.7rem 1.4rem;
+          background: red;
+          border: none;
+          border-radius: 0.3rem;
           color: #fff;
           font-size: 1.2rem;
         }
