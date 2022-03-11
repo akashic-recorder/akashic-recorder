@@ -18,20 +18,16 @@ const INFURA_ID = '6ae5bd1d600f40048725736711ef4acb'
 const providerOptions = {
   sequence: {
     options: {
-      appName: 'Sequence', // Your app name
+      appName: 'Sequence',
       defaultNetwork: 'polygon',
       chainId: 137,
     },
     package: sequence,
-    connector: async (_: any, options: any) => {
-      // const sequenceWallet = new sequence.Wallet('mainnet')
-      // const { chainId } = options
-      // const provider = sequenceWallet.getProvider(chainId)
-      // return provider
+    connector: async () => {
       const wallet = await web3Modal.connect()
       const provider = new ethers.providers.Web3Provider(wallet)
       if (wallet.sequence) {
-        ;(provider as any).sequence = wallet.sequence
+        (provider as any).sequence = wallet.sequence
       }
       return provider
     },
@@ -117,19 +113,18 @@ function reducer(state: StateType, action: ActionType): StateType {
 export const Home = (): JSX.Element => {
   const [state, dispatch] = useReducer(reducer, initialState)
   const { provider, web3Provider, address, chainId } = state
-  const [events, setEvents] = useState([]);
-  const [isLoading, setLoading] = useState(false);
+  const [events, setEvents] = useState([])
+  const [isLoading, setLoading] = useState(false)
 
   const connect = useCallback(async function () {
     const provider = await web3Modal.connect()
     const web3Provider = new ethers.providers.Web3Provider(provider)
     if (provider.sequence) {
-      ;(provider as any).sequence = provider.sequence
+      (provider as any).sequence = provider.sequence
     }
     const signer = web3Provider.getSigner()
     const address = await signer.getAddress()
     const network = await web3Provider.getNetwork()
-    console.log(123, network.chainId, await signer.getChainId())
     dispatch({
       type: 'SET_WEB3_PROVIDER',
       provider,
