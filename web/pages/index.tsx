@@ -1,9 +1,10 @@
 import WalletConnectProvider from '@walletconnect/web3-provider'
 import { providers } from 'ethers'
-import WalletLink from 'walletlink'
 import Web3Modal from 'web3modal'
+import { sequence } from '0xsequence'
 import Head from 'next/head'
 import { useCallback, useEffect, useReducer, useState } from 'react'
+import { Button } from '@chakra-ui/react'
 import { ellipseAddress, getChainData } from '../lib/utilities'
 import mintPort from '../lib/mintport'
 import akaschicRecorder from '../lib/akaschicRecorder'
@@ -12,32 +13,29 @@ import Card from "../components/Card"
 const INFURA_ID = '6ae5bd1d600f40048725736711ef4acb'
 
 const providerOptions = {
+  'custom-walletlink-sequence': {
+    display: {
+      logo: 'https://sequence.app/images/sequence-logo.svg',
+      name: 'Sequence',
+      description: 'Connect to Sequence Wallet',
+    },
+    options: {
+      appName: 'Sequence', // Your app name
+      networkUrl: `https://mainnet.infura.io/v3/${INFURA_ID}`,
+      chainId: 1,
+    },
+    package: sequence.Wallet,
+    connector: async (_, options) => {
+      const sequenceWallet = new sequence.Wallet('mainnet')
+      const { chainId } = options
+      const provider = sequenceWallet.getProvider(chainId)
+      return provider
+    },
+  },
   walletconnect: {
     package: WalletConnectProvider, // required
     options: {
       infuraId: INFURA_ID, // required
-    },
-  },
-  'custom-walletlink': {
-    display: {
-      logo: 'https://play-lh.googleusercontent.com/PjoJoG27miSglVBXoXrxBSLveV6e3EeBPpNY55aiUUBM9Q1RCETKCOqdOkX2ZydqVf0',
-      name: 'Coinbase',
-      description: 'Connect to Coinbase Wallet (not Coinbase App)',
-    },
-    options: {
-      appName: 'Coinbase', // Your app name
-      networkUrl: `https://mainnet.infura.io/v3/${INFURA_ID}`,
-      chainId: 1,
-    },
-    package: WalletLink,
-    connector: async (_, options) => {
-      const { appName, networkUrl, chainId } = options
-      const walletLink = new WalletLink({
-        appName,
-      })
-      const provider = walletLink.makeWeb3Provider(networkUrl, chainId)
-      await provider.enable()
-      return provider
     },
   },
 }
@@ -116,6 +114,7 @@ export const Home = (): JSX.Element => {
   const [state, dispatch] = useReducer(reducer, initialState)
   const { provider, web3Provider, address, chainId } = state
   const [events, setEvents] = useState([]);
+  const [isLoading, setLoading] = useState(false);
 
   const connect = useCallback(async function () {
     const provider = await web3Modal.connect()
@@ -150,8 +149,13 @@ export const Home = (): JSX.Element => {
       alert('Please connect wallet')
       return
     }
-    const events = await akaschicRecorder.getEvents(address)
-    setEvents(events)
+    setLoading(true)
+    try {
+      const events = await akaschicRecorder.getEvents(address)
+      setEvents(events)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const mint = async function () {
@@ -163,16 +167,12 @@ export const Home = (): JSX.Element => {
     await mintPort.mint(address)
   }
 
-  // Auto connect to the cached provider
   useEffect(() => {
     if (web3Modal.cachedProvider) {
       connect()
     }
   }, [connect])
 
-  // A `provider` should come with EIP-1193 events. We'll listen for those events
-  // here so that when a user switches accounts or networks, we can update the
-  // local React state with that new information.
   useEffect(() => {
     if (provider?.on) {
       const handleAccountsChanged = (accounts: string[]) => {
@@ -184,7 +184,6 @@ export const Home = (): JSX.Element => {
         })
       }
 
-      // https://docs.ethers.io/v5/concepts/best-practices/#best-practices--network-changes
       const handleChainChanged = (_hexChainId: string) => {
         window.location.reload()
       }
@@ -199,7 +198,6 @@ export const Home = (): JSX.Element => {
       provider.on('chainChanged', handleChainChanged)
       provider.on('disconnect', handleDisconnect)
 
-      // Subscription Cleanup
       return () => {
         if (provider.removeListener) {
           provider.removeListener('accountsChanged', handleAccountsChanged)
@@ -213,132 +211,98 @@ export const Home = (): JSX.Element => {
   const chainData = getChainData(chainId)
 
   return (
-    <div className="container">
-      <Head>
-        <title>Certificates | Akashic Records</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+    <>
+      <div className="container bg-gray-100 font-body">
+        <Head>
+          <title>Certificates | Akashic Records</title>
+          <link rel="icon" href="/favicon.ico" />
+        </Head>
 
-      <header>
-        {address && (
-          <div className="grid">
-            <div>
+        <header>
+          {address && (
+            <div className="grid">
               <div>
-                <p className="mb-1">Address: {ellipseAddress(address)}</p>
+                <div>
+                  <p className="mb-1">👤 {ellipseAddress(address)}</p>
+                </div>
+                <div>
+                  <p className="mb-1">🔌 {chainData?.name}</p>
+                </div>
               </div>
               <div>
-                <p className="mb-1">Network: {chainData?.name}</p>
+                <Button colorScheme='red' variant='solid' size='md' onClick={disconnect}>
+                  Disconnect
+                </Button>
               </div>
             </div>
-            <div>
-              <button className="disconnect-button" type="button" onClick={disconnect}>
-                Disconnect
-              </button>
-            </div>
-          </div>
-        )}
-      </header>
+          )}
+        </header>
 
-      <main className='section'>
-        <p className="text-2xl">Event Participation Certificates</p>
+        <main className='section'>
+          <div className="p-8 title">Event Participation Certificates</div>
 
-        {web3Provider && events.length === 0 ? (
-          <>
-            <br/><br/>
-            <button className="button" type="button" onClick={checkEvents}>
+          {web3Provider && events.length === 0 ? (
+            <Button isLoading={isLoading} colorScheme='red' variant='solid' onClick={checkEvents} size="lg">
               Check Certificates
-            </button>
-          </>
-        ) : !web3Provider ? (
-          <button className="button" type="button" onClick={connect}>
-            Connect Wallet
-          </button>
-        ) : null}
-
-        <section className="container">
-          {events ? (
-            <div className="layout">
-              {events.map((element, index) => (
-                // TODO:
-                <Card
-                  key={index}
-                  // title={element.title}
-                  // likes={element.likes}
-                  // order={index + 1}
-                  // image={element.image}
-                  title="2021 Mar 1st Event"
-                  image="https://lh3.googleusercontent.com/ZMdzHfjinqrmesQuaQZz119y6IymfiKjRpdVyi2BHJC9mkiMZAyAP4M3uU8wZF-3diC3MCLfdlyj1yAbqkSsp6dZUzu0L2zbzvW8yNs=w600"
-                  // image="https://lh3.googleusercontent.com/Z7D7DxNK7rzqV2_SrxGsixtmfmESqGY13iZaENj8Nixr-90QdQhmRyxh8LwjB8MnX8AXOrBRr4rQCXlFuH69h4lMSi96SO8K4ed06A=w600"
-                  action={mint}
-                />
-              ))}
-            </div>
+            </Button>
+          ) : !web3Provider ? (
+            <Button colorScheme='red' variant='solid' onClick={connect} size="lg">
+              Connect Wallet
+            </Button>
           ) : null}
-        </section>
-      </main>
 
-      <style jsx>{`
-        main {
-          text-align: center;
-        }
+          <section className="container">
+            {web3Provider && events ? (
+              <div className="layout">
+                {events.map((element, index) => (
+                  <Card
+                    key={index}
+                    eventId={element.event_id}
+                    start={element.start}
+                    end={element.end}
+                    order={element.order}
+                    address={element.address}
+                    cid={element.cid}
+                    title="2021 Mar 1st Event"
+                    imageUrl="https://lh3.googleusercontent.com/ZMdzHfjinqrmesQuaQZz119y6IymfiKjRpdVyi2BHJC9mkiMZAyAP4M3uU8wZF-3diC3MCLfdlyj1yAbqkSsp6dZUzu0L2zbzvW8yNs=w600"
+                    action={mint}
+                  />
+                ))}
+              </div>
+            ) : null}
+          </section>
+        </main>
 
-        p {
-          margin-top: 0;
-        }
+        <style jsx>{`
+          main {
+            text-align: center;
+          }
 
-        .container {
-          padding: 2rem;
-          margin: 0 auto;
-          max-width: 1200px;
-        }
+          p {
+            margin-top: 0;
+          }
 
-        .grid {
-          display: grid;
-          grid-template-columns: auto auto;
-          justify-content: space-between;
-        }
+          .container {
+            padding: 2rem;
+            margin: 0 auto;
+          }
 
-        .button {
-          padding: 1rem 1.5rem;
-          background: ${web3Provider ? 'red' : 'green'};
-          border: none;
-          border-radius: 0.5rem;
-          color: #fff;
-          font-size: 1.2rem;
-        }
+          .grid {
+            display: grid;
+            grid-template-columns: auto auto;
+            justify-content: space-between;
+          }
 
-        .disconnect-button {
-          padding: 0.7rem 1.4rem;
-          background: red;
-          border: none;
-          border-radius: 0.3rem;
-          color: #fff;
-          font-size: 1.2rem;
-        }
-
-        .mb-0 {
-          margin-bottom: 0;
-        }
-        .mb-1 {
-          margin-bottom: 0.25rem;
-        }
-      `}</style>
-
-      <style jsx global>{`
-        html,
-        body {
-          padding: 0;
-          margin: 0;
-          font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto,
-            Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue,
-            sans-serif;
-        }
-
-        * {
-          box-sizing: border-box;
-        }
-      `}</style>
-    </div>
+          .mb-0 {
+            margin-bottom: 0;
+          }
+          .mb-1 {
+            margin-bottom: 0.25rem;
+          }
+        `}</style>
+      </div>
+      <footer></footer>
+    </>
   )
 }
 

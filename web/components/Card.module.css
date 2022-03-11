@@ -1,5 +1,5 @@
 .wrapper {
-  @apply m-4 bg-white hover:bg-yellow-100 shadow-xl hover:shadow-none cursor-pointer w-auto rounded-3xl flex flex-col items-center justify-center;
+  @apply bg-white hover:bg-yellow-100 shadow-xl hover:shadow-none cursor-pointer w-80 rounded-3xl flex flex-col items-center justify-center;
 }
 
 .wrapperAnime {

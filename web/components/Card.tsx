@@ -1,35 +1,69 @@
 import React from 'react'
+import { Text, Link } from '@chakra-ui/react'
+import { useState } from 'react'
 import classNames from 'classnames'
 
 import styles from './Card.module.css'
 
-const Card = ({ title, image, action }) => {
+const Card = ({ eventId, start, end, order, address, cid, title, imageUrl, action }) => {
+  const [isSending, setSending] = useState(false);
+  const [claimed, setClaimed] = useState(false);
+
+  const doAction = async () => {
+    const sleep = ms => new Promise((resolve) => setTimeout(resolve, ms));
+    setSending(true)
+    try {
+      await action()
+      await sleep(2000);
+      setClaimed(true)
+    } finally {
+      setSending(false)
+    }
+  }
+  
+  const timeMilliSec = new Date(end).getTime() - new Date(start).getTime()
+  const timeSec = Math.floor(Math.abs(timeMilliSec)/1000)
+
   return (
     <div className={classNames([styles.wrapper, styles.wrapperAnime])}>
       <div className={styles.header}>
         <div className={styles.imageWrapper}>
-          <img src={image} className={styles.image} alt='' />
+          <img src={imageUrl} className={styles.image} alt='' />
         </div>
-        <div className={styles.badgeWrapper}>
-          <div
-            className={classNames([
-              styles.claimBadge,
-              styles.badgeAnime,
-              'group',
-            ])}
-          >
-            <button
-              type="button"
-              onClick={action}
-              className={classNames([styles.counter, 'group-hover:text-white'])}
+        {!claimed ? (
+          <div className={styles.badgeWrapper}>
+            <div
+              className={classNames([
+                styles.claimBadge,
+                styles.badgeAnime,
+                'group',
+              ])}
             >
-              Claim NFT
-            </button>
+              {!isSending? (
+                <button
+                  type="button"
+                  onClick={doAction}
+                  className={classNames([styles.counter, 'group-hover:text-white'])}
+                >
+                  <Text fontSize='md'>
+                    <div style={{fontWeight: 600}}>Claim NFT</div>
+                  </Text>
+                </button>
+              ) : (
+                <Text fontSize='md'>
+                  <div style={{fontWeight: 600}}>Sending...</div>
+                </Text>
+              )}
+            </div>
           </div>
-        </div>
+        ) : null}        
       </div>
       <div className={styles.textWrapper}>
-        <h1 className={styles.text}>{`${title}`}</h1>
+        <div style={{fontWeight: 600}}>{`${title}`}</div>
+        
+        <p>{`Rank: #${order}`}</p>
+        <p>{`Time: ${timeSec} sec`}</p>
+        <Link href={`$cid`}>IPFS Link 🔗</Link>
       </div>
     </div>
   );

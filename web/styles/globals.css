@@ -1,15 +1,30 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+.title {
+  @apply text-gray-600 text-4xl font-bold;
+}
+
 .section {
-  @apply bg-gray-100 h-full md:h-screen w-full;
+  @apply h-full h-screen w-full;
 }
 
 .container {
-  @apply container mx-auto px-0 md:px-4 py-4;
+  @apply mx-auto px-0;
 }
 
 .layout {
-  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 justify-items-center gap-4;
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 justify-items-center gap-12 lg:gap-36 2xl:gap-36;
+}
+
+footer {
+  position: fixed;
+  width: 100%;
+  height: 20px;
+  bottom: 0;
+  text-align: center;
+  z-index: 1000;
 }
