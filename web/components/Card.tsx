@@ -26,6 +26,7 @@ const Card = ({ eventId, start, end, order, address, cid, title, imageUrl, actio
   
   const timeMilliSec = new Date(end).getTime() - new Date(start).getTime()
   const timeSec = Math.floor(Math.abs(timeMilliSec)/1000)
+  const dateStr = new Date(end).toLocaleString()
 
   return (
     <div className={classNames([styles.wrapper, styles.wrapperAnime])}>
@@ -64,9 +65,10 @@ const Card = ({ eventId, start, end, order, address, cid, title, imageUrl, actio
       <div className={styles.textWrapper}>
         <div style={{fontWeight: 600}}>{`${title}`}</div>
         
-        <p>{`Rank: #${order}`}</p>
-        <p>{`Time: ${timeSec} sec`}</p>
-        <Link href={`https://ipfs.io/ipfs/${cid}`} target="_blank">IPFS Link 🔗</Link>
+        <p>{`🏆 Rank: #${order}`}</p>
+        <p>{`⏱ Time: ${timeSec} sec`}</p>
+        <p>{`${dateStr}`}</p>
+        <Link href={`https://ipfs.io/ipfs/${cid}`} target="_blank">🔗 IPFS Link</Link>
       </div>
     </div>
   );
