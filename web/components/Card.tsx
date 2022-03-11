@@ -9,12 +9,15 @@ const Card = ({ eventId, start, end, order, address, cid, title, imageUrl, actio
   const [isSending, setSending] = useState(false);
   const [claimed, setClaimed] = useState(false);
 
+  // eslint-disable-next-line no-console
+  console.log(eventId, address)
+
   const doAction = async () => {
-    const sleep = ms => new Promise((resolve) => setTimeout(resolve, ms));
+    const sleep = (ms: any) => new Promise((resolve) => setTimeout(resolve, ms));
     setSending(true)
     try {
       await action()
-      await sleep(2000);
+      await sleep(1000);
       setClaimed(true)
     } finally {
       setSending(false)
@@ -63,7 +66,7 @@ const Card = ({ eventId, start, end, order, address, cid, title, imageUrl, actio
         
         <p>{`Rank: #${order}`}</p>
         <p>{`Time: ${timeSec} sec`}</p>
-        <Link href={`$cid`}>IPFS Link 🔗</Link>
+        <Link href={`https://ipfs.io/ipfs/${cid}`} target="_blank">IPFS Link 🔗</Link>
       </div>
     </div>
   );
