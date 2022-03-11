@@ -1,34 +1,38 @@
 import WalletConnectProvider from '@walletconnect/web3-provider'
-import { providers } from 'ethers'
-import Web3Modal from 'web3modal'
+import { ethers } from 'ethers'
+import Web3Modal from '@0xsequence/web3modal'
 import { sequence } from '0xsequence'
+import { configureLogger } from '@0xsequence/utils'
 import Head from 'next/head'
 import { useCallback, useEffect, useReducer, useState } from 'react'
 import { Button } from '@chakra-ui/react'
 import { ellipseAddress, getChainData } from '../lib/utilities'
-import mintPort from '../lib/mintport'
+import nftPort from '../lib/nftport'
 import akaschicRecorder from '../lib/akaschicRecorder'
 import Card from "../components/Card"
+
+configureLogger({ logLevel: 'DEBUG' })
 
 const INFURA_ID = '6ae5bd1d600f40048725736711ef4acb'
 
 const providerOptions = {
-  'custom-walletlink-sequence': {
-    display: {
-      logo: 'https://sequence.app/images/sequence-logo.svg',
-      name: 'Sequence',
-      description: 'Connect to Sequence Wallet',
-    },
+  sequence: {
     options: {
       appName: 'Sequence', // Your app name
-      networkUrl: `https://mainnet.infura.io/v3/${INFURA_ID}`,
-      chainId: 1,
+      defaultNetwork: 'polygon',
+      chainId: 137,
     },
-    package: sequence.Wallet,
-    connector: async (_, options) => {
-      const sequenceWallet = new sequence.Wallet('mainnet')
-      const { chainId } = options
-      const provider = sequenceWallet.getProvider(chainId)
+    package: sequence,
+    connector: async (_: any, options: any) => {
+      // const sequenceWallet = new sequence.Wallet('mainnet')
+      // const { chainId } = options
+      // const provider = sequenceWallet.getProvider(chainId)
+      // return provider
+      const wallet = await web3Modal.connect()
+      const provider = new ethers.providers.Web3Provider(wallet)
+      if (wallet.sequence) {
+        ;(provider as any).sequence = wallet.sequence
+      }
       return provider
     },
   },
@@ -118,10 +122,14 @@ export const Home = (): JSX.Element => {
 
   const connect = useCallback(async function () {
     const provider = await web3Modal.connect()
-    const web3Provider = new providers.Web3Provider(provider)
+    const web3Provider = new ethers.providers.Web3Provider(provider)
+    if (provider.sequence) {
+      ;(provider as any).sequence = provider.sequence
+    }
     const signer = web3Provider.getSigner()
     const address = await signer.getAddress()
     const network = await web3Provider.getNetwork()
+    console.log(123, network.chainId, await signer.getChainId())
     dispatch({
       type: 'SET_WEB3_PROVIDER',
       provider,
@@ -135,7 +143,12 @@ export const Home = (): JSX.Element => {
     async function () {
       await web3Modal.clearCachedProvider()
       if (provider?.disconnect && typeof provider.disconnect === 'function') {
-        await provider.disconnect()
+        if (provider && (provider as any).sequence) {
+          const wallet = (provider as any).sequence as sequence.Wallet
+          wallet.disconnect()
+        } else {
+          await provider.disconnect()
+        }    
       }
       dispatch({
         type: 'RESET_WEB3_PROVIDER',
@@ -159,12 +172,12 @@ export const Home = (): JSX.Element => {
   }
 
   const mint = async function () {
-    // await mintPort.getNFTs()
+    // await nftPort.getNFTs()
     if (!address) {
       alert('Please connect wallet')
       return
     }
-    await mintPort.mint(address)
+    await nftPort.mint(address)
   }
 
   useEffect(() => {

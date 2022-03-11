@@ -193,6 +193,22 @@ const supportedChains: IChainData[] = [
       balance: '',
     },
   },
+  {
+    name: 'Polygon',
+    short_name: 'polygon',
+    chain: 'polygon',
+    network: 'mainnet',
+    chain_id: 137,
+    network_id: 137,
+    rpc_url: 'https://polygon.infura.io/v3/%API_KEY%',
+    native_currency: {
+      symbol: 'MATIC',
+      name: 'MATIC',
+      decimals: '18',
+      contractAddress: '',
+      balance: '',
+    },
+  },
 ]
 
 export default supportedChains

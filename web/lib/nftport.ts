@@ -9,7 +9,7 @@ export const apiClient = axios.create({
     },
 });
 
-class MintPort {
+class NFTPort {
     async getNFTs() {
         await apiClient.get('/nfts', {
             params: {
@@ -31,4 +31,4 @@ class MintPort {
     }
 }
 
-export default new MintPort()
+export default new NFTPort()
