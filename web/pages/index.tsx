@@ -127,6 +127,7 @@ export const Home = (): JSX.Element => {
   const { provider, web3Provider, address, chainId } = state
   const [events, setEvents] = useState([])
   const [txExternalUrl, setTxExternalUrl] = useState("")
+  const [toAddress, setToAddress] = useState("")
   const [isLoading, setLoading] = useState(false)
   const { isOpen, onOpen, onClose } = useDisclosure()
 
@@ -181,13 +182,17 @@ export const Home = (): JSX.Element => {
     }
   }
 
-  const mint = async function () {
+  const mint = async function (argsObj) {
     // await nftPort.getNFTs()
     if (!address) {
       alert('Please connect wallet')
       return
     }
-    const txExternalUrl = await nftPort.mint(address)
+    setToAddress(address)
+    const txExternalUrl = await nftPort.mint({
+      toAddress: address,
+      ...argsObj,
+    })
     setTxExternalUrl(txExternalUrl)
     onOpen()
   }
@@ -318,7 +323,7 @@ export const Home = (): JSX.Element => {
                           View Tx on Etherscan
                         </Button>
                         <br />
-                        <Button as="a" href={`https://testnets.opensea.io/${address}`} target="_blank" className='mb-4' colorScheme='blue' variant='solid' size='md'>
+                        <Button as="a" href={`https://testnets.opensea.io/${toAddress}`} target="_blank" className='mb-4' colorScheme='blue' variant='solid' size='md'>
                           View NFT on OpenSea
                         </Button>
                       </AlertDialogBody>

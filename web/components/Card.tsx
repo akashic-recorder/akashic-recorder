@@ -12,11 +12,11 @@ const Card = ({ eventId, start, end, order, address, cid, title, imageUrl, actio
   // eslint-disable-next-line no-console
   console.log(eventId, address)
 
-  const doAction = async () => {
+  const doAction = async (argsObj) => {
     const sleep = (ms: any) => new Promise((resolve) => setTimeout(resolve, ms));
     setSending(true)
     try {
-      await action()
+      await action(argsObj)
       await sleep(1000);
       setClaimed(true)
     } finally {
@@ -46,7 +46,9 @@ const Card = ({ eventId, start, end, order, address, cid, title, imageUrl, actio
               {!isSending? (
                 <button
                   type="button"
-                  onClick={doAction}
+                  onClick={
+                    () => doAction({ eventId, address, timeSec, order, dateStr, cid })
+                  }
                   className={classNames([styles.counter, 'group-hover:text-white'])}
                 >
                   <Text fontSize='md'>
