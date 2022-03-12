@@ -28,6 +28,7 @@ class NFTPort {
         })
         // eslint-disable-next-line no-console
         console.log(res)
+        return res.data.transaction_external_url
     }
 }
 

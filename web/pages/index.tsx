@@ -5,11 +5,23 @@ import { sequence } from '0xsequence'
 import { configureLogger } from '@0xsequence/utils'
 import Head from 'next/head'
 import { useCallback, useEffect, useReducer, useState } from 'react'
-import { Button } from '@chakra-ui/react'
+import {
+  Text,
+  Button,
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogCloseButton,
+  AlertDialogBody,
+  AlertDialogFooter,
+  useDisclosure,
+} from '@chakra-ui/react'
+import useWindowSize from 'react-use/lib/useWindowSize'
+import Confetti from 'react-confetti'
 import { ellipseAddress, getChainData } from '../lib/utilities'
 import nftPort from '../lib/nftport'
 import akaschicRecorder from '../lib/akaschicRecorder'
-import Card from "../components/Card"
+import Card from '../components/Card'
 
 configureLogger({ logLevel: 'DEBUG' })
 
@@ -114,7 +126,9 @@ export const Home = (): JSX.Element => {
   const [state, dispatch] = useReducer(reducer, initialState)
   const { provider, web3Provider, address, chainId } = state
   const [events, setEvents] = useState([])
+  const [txExternalUrl, setTxExternalUrl] = useState("")
   const [isLoading, setLoading] = useState(false)
+  const { isOpen, onOpen, onClose } = useDisclosure()
 
   const connect = useCallback(async function () {
     const provider = await web3Modal.connect()
@@ -145,6 +159,7 @@ export const Home = (): JSX.Element => {
           await provider.disconnect()
         }    
       }
+      onClose()
       dispatch({
         type: 'RESET_WEB3_PROVIDER',
       })
@@ -172,7 +187,9 @@ export const Home = (): JSX.Element => {
       alert('Please connect wallet')
       return
     }
-    await nftPort.mint(address)
+    const txExternalUrl = await nftPort.mint(address)
+    setTxExternalUrl(txExternalUrl)
+    onOpen()
   }
 
   useEffect(() => {
@@ -217,6 +234,8 @@ export const Home = (): JSX.Element => {
   }, [provider, disconnect])
 
   const chainData = getChainData(chainId)
+
+  const { width, height } = useWindowSize()
 
   return (
     <>
@@ -276,6 +295,37 @@ export const Home = (): JSX.Element => {
                     action={mint}
                   />
                 ))}
+                <AlertDialog
+                  isOpen={isOpen}
+                  onClose={onClose}
+                  leastDestructiveRef={undefined}
+                  autoFocus={false}
+                  isCentered
+                  closeOnOverlayClick={false}
+                >
+                  {/* <AlertDialogOverlay opacity={0.95}> */}
+                    <Confetti
+                      width={width}
+                      height={height}
+                      recycle={true}
+                    />
+                    <AlertDialogContent>
+                      <AlertDialogHeader>Congraturations!</AlertDialogHeader>
+                      <AlertDialogCloseButton />
+                      <AlertDialogBody className='mb-4'>
+                        <Text className='mb-4'>NFT is being sent to you now.</Text>
+                        <Button as="a" href={txExternalUrl} target="_blank" className='mb-4' colorScheme='teal' variant='solid' size='md'>
+                          View Tx on Etherscan
+                        </Button>
+                        <br />
+                        <Button as="a" href={`https://testnets.opensea.io/${address}`} target="_blank" className='mb-4' colorScheme='blue' variant='solid' size='md'>
+                          View NFT on OpenSea
+                        </Button>
+                      </AlertDialogBody>
+                      <AlertDialogFooter />
+                    </AlertDialogContent>
+                  {/* </AlertDialogOverlay> */}
+                </AlertDialog>
               </div>
             ) : null}
           </section>
