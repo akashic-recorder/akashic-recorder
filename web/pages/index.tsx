@@ -16,7 +16,9 @@ import {
   AlertDialogBody,
   AlertDialogFooter,
   useDisclosure,
+  IconButton,
 } from '@chakra-ui/react'
+import { CopyIcon } from '@chakra-ui/icons'
 import useWindowSize from 'react-use/lib/useWindowSize'
 import Confetti from 'react-confetti'
 import { ellipseAddress, getChainData } from '../lib/utilities'
@@ -253,7 +255,18 @@ export const Home = (): JSX.Element => {
             <div className="grid">
               <div>
                 <div>
-                  <p className="mb-1">👤 {ellipseAddress(address)}</p>
+                  <p className="mb-1">
+                    👤 {ellipseAddress(address)}
+                    {' '}
+                    <IconButton
+                      aria-label='Copy'
+                      fontSize='12px'
+                      size='xs'
+                      icon={<CopyIcon />}
+                      className="mb-1"
+                      onClick={() => navigator.clipboard.writeText(address)}
+                    />
+                  </p>
                 </div>
                 <div>
                   <p className="mb-1">🔌 {chainData?.name}</p>
