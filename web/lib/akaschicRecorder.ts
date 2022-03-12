@@ -12,7 +12,7 @@ class AkaschicRecorder {
     async getEvents(address: string) {
         const eventId = 1
         const chainId = 80001 // Mumbai
-        const url = `/${eventId}/${chainId}/${address}`
+        const url = `/${eventId}/${chainId}/${address.toLowerCase()}`
         let res: any = await apiClient.get(url, {})
         
         // TODO: Remove
