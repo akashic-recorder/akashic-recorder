@@ -1,16 +1,16 @@
 import React from 'react'
-import { Text, Link } from '@chakra-ui/react'
+import { Text, Link, Spinner } from '@chakra-ui/react'
 import { useState } from 'react'
 import classNames from 'classnames'
 
 import styles from './Card.module.css'
 
-const Card = ({ eventId, start, end, order, address, cid, title, imageUrl, action }) => {
+const Card = ({ eventId, startTime, endTime, eventName, rankNum, walletAddress, cid, imageUrl, action }) => {
   const [isSending, setSending] = useState(false);
   const [claimed, setClaimed] = useState(false);
 
   // eslint-disable-next-line no-console
-  console.log(eventId, address)
+  console.log(eventId, walletAddress)
 
   const doAction = async (argsObj) => {
     const sleep = (ms: any) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -24,9 +24,9 @@ const Card = ({ eventId, start, end, order, address, cid, title, imageUrl, actio
     }
   }
   
-  const timeMilliSec = new Date(end).getTime() - new Date(start).getTime()
+  const timeMilliSec = new Date(endTime).getTime() - new Date(startTime).getTime()
   const timeSec = Math.floor(Math.abs(timeMilliSec)/1000)
-  const dateStr = new Date(end).toLocaleString()
+  const dateStr = new Date(endTime).toLocaleString()
 
   return (
     <div className={classNames([styles.wrapper, styles.wrapperAnime])}>
@@ -47,7 +47,7 @@ const Card = ({ eventId, start, end, order, address, cid, title, imageUrl, actio
                 <button
                   type="button"
                   onClick={
-                    () => doAction({ eventId, address, timeSec, order, dateStr, cid })
+                    () => doAction({ eventId, eventName, walletAddress, timeSec, rankNum, dateStr, cid })
                   }
                   className={classNames([styles.counter, 'group-hover:text-white'])}
                 >
@@ -56,18 +56,16 @@ const Card = ({ eventId, start, end, order, address, cid, title, imageUrl, actio
                   </Text>
                 </button>
               ) : (
-                <Text fontSize='md'>
-                  <div style={{fontWeight: 600}}>Sending...</div>
-                </Text>
+                <Spinner size='sm' />
               )}
             </div>
           </div>
         ) : null}        
       </div>
       <div className={styles.textWrapper}>
-        <div style={{fontWeight: 600}}>{`${title}`}</div>
+        <div style={{fontWeight: 600}}>{`${eventName}`}</div>
         
-        <p>{`🏆 Rank: #${order}`}</p>
+        <p>{`🏆 Rank: #${rankNum}`}</p>
         <p>{`⏱ Time: ${timeSec} sec`}</p>
         <p>{`${dateStr}`}</p>
         <Link href={`https://ipfs.io/ipfs/${cid}`} target="_blank">🔗 IPFS Link</Link>

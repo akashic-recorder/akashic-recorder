@@ -18,12 +18,13 @@ class NFTPort {
         })
     }
 
-    async mint({ toAddress, eventId, address, timeSec, order, dateStr, cid }) {
+    async mint({ eventId, eventName, walletAddress, timeSec, rankNum, dateStr, cid }) {
         let description = 'This NFT is proof that you have defeated the boss character of the game.\n\n'
         description += `- Event Id: ${eventId}\n`
-        description += `- Address: ${address}\n`
+        description += `- Event Name: ${eventName}\n`
+        description += `- Address: ${walletAddress}\n`
         description += `- Time: ${timeSec} sec\n`
-        description += `- Rank: #${order}\n`
+        description += `- Rank: #${rankNum}\n`
         description += `- Date: ${dateStr}\n`
         description += `- CID: ${cid}\n`
         const res = await apiClient.post('/mints/easy/urls', {
@@ -31,7 +32,7 @@ class NFTPort {
             name: 'Game Clear Proof',
             description,
             file_url: 'https://gateway.pinata.cloud/ipfs/QmV1o53q2aYyvesLyUbSrMnvRjsQuRRAx5WqCHXb4qG23i',
-            mint_to_address: toAddress,
+            mint_to_address: walletAddress,
         })
         // eslint-disable-next-line no-console
         console.log(res)

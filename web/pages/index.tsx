@@ -8,6 +8,7 @@ import { useCallback, useEffect, useReducer, useState } from 'react'
 import {
   Text,
   Button,
+  Center,
   AlertDialog,
   AlertDialogContent,
   AlertDialogHeader,
@@ -182,17 +183,14 @@ export const Home = (): JSX.Element => {
     }
   }
 
-  const mint = async function (argsObj) {
+  const mint = async (argsObj) => {
     // await nftPort.getNFTs()
     if (!address) {
       alert('Please connect wallet')
       return
     }
-    setToAddress(address)
-    const txExternalUrl = await nftPort.mint({
-      toAddress: address,
-      ...argsObj,
-    })
+    setToAddress(argsObj.walletAddress)
+    const txExternalUrl = await nftPort.mint(argsObj)
     setTxExternalUrl(txExternalUrl)
     onOpen()
   }
@@ -290,12 +288,12 @@ export const Home = (): JSX.Element => {
                   <Card
                     key={index}
                     eventId={element.event_id}
-                    start={element.start}
-                    end={element.end}
-                    order={element.order}
-                    address={element.address}
+                    startTime={element.start_time}
+                    endTime={element.end_time}
+                    eventName={element.event_name}
+                    rankNum={element.rank_num}
+                    walletAddress={element.wallet_address}
                     cid={element.cid}
-                    title="2021 Mar 1st Event"
                     imageUrl="https://lh3.googleusercontent.com/ZMdzHfjinqrmesQuaQZz119y6IymfiKjRpdVyi2BHJC9mkiMZAyAP4M3uU8wZF-3diC3MCLfdlyj1yAbqkSsp6dZUzu0L2zbzvW8yNs=w600"
                     action={mint}
                   />
@@ -315,17 +313,20 @@ export const Home = (): JSX.Element => {
                       recycle={true}
                     />
                     <AlertDialogContent>
-                      <AlertDialogHeader>Congraturations!</AlertDialogHeader>
+                      <AlertDialogHeader><Center>Congraturations!</Center></AlertDialogHeader>
                       <AlertDialogCloseButton />
                       <AlertDialogBody className='mb-4'>
-                        <Text className='mb-4'>NFT is being sent to you now.</Text>
-                        <Button as="a" href={txExternalUrl} target="_blank" className='mb-4' colorScheme='teal' variant='solid' size='md'>
-                          View Tx on Etherscan
-                        </Button>
-                        <br />
-                        <Button as="a" href={`https://testnets.opensea.io/${toAddress}`} target="_blank" className='mb-4' colorScheme='blue' variant='solid' size='md'>
-                          View NFT on OpenSea
-                        </Button>
+                        <Center><Text className='mb-4'>NFT is being sent to you now.</Text></Center>
+                        <Center>
+                          <Button as="a" href={txExternalUrl} target="_blank" className='mb-4' colorScheme='teal' variant='solid' size='md'>
+                            View Tx on Etherscan
+                          </Button>
+                        </Center>
+                        <Center>
+                          <Button as="a" href={`https://testnets.opensea.io/${toAddress}`} target="_blank" className='mb-4' colorScheme='blue' variant='solid' size='md'>
+                            View NFT on OpenSea
+                          </Button>
+                        </Center>
                       </AlertDialogBody>
                       <AlertDialogFooter />
                     </AlertDialogContent>
