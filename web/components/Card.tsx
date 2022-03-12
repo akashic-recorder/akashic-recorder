@@ -68,7 +68,7 @@ const Card = ({ eventId, startTime, endTime, eventName, rankNum, walletAddress, 
         <p>{`🏆 Rank: #${rankNum}`}</p>
         <p>{`⏱ Time: ${timeSec} sec`}</p>
         <p>{`${dateStr}`}</p>
-        <Link href={`https://ipfs.io/ipfs/${cid}`} target="_blank">🔗 IPFS Link</Link>
+        <Link href={`https://gateway.lighthouse.storage/ipfs/${cid}`} target="_blank">🔗 IPFS Link</Link>
       </div>
     </div>
   );
