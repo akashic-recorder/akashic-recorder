@@ -10,7 +10,8 @@ export function getChainData(chainId?: number): IChainData {
   )[0]
 
   if (!chainData) {
-    throw new Error('ChainId missing or not supported')
+    return null
+    // throw new Error('ChainId missing or not supported')
   }
 
   const API_KEY = '460f40a260564ac4a4f4b3fffb032dad'

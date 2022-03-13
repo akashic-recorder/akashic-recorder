@@ -269,7 +269,7 @@ export const Home = (): JSX.Element => {
                   </p>
                 </div>
                 <div>
-                  <p className="mb-1">🔌 {chainData?.name}</p>
+                  <p className="mb-1">🔌 {chainData?.name || web3Provider?.network?.name}</p>
                 </div>
               </div>
               <div>
