@@ -1,0 +1,9 @@
+[submodule "api/akashic-recorder-api"]
+	path = api/akashic-recorder-api
+	url = https://github.com/akashic-recorder/akashic-recorder-api
+[submodule "unity_game/sample-game_FPS"]
+	path = unity_game/sample-game_FPS
+	url = https://github.com/akashic-recorder/sample-game_FPS
+[submodule "listener/akashic-recorder-listener"]
+	path = listener/akashic-recorder-listener
+	url = https://github.com/akashic-recorder/akashic-recorder-listener
