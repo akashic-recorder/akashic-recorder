@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 export const apiClient = axios.create({
-    baseURL: 'https://akaschic-recorder-api.herokuapp.com/api',
+    baseURL: 'https://akashic-recorder-api.herokuapp.com/api',
     responseType: 'json',
     headers: {
         'Content-Type': 'application/json',
